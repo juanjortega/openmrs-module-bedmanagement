@@ -11,6 +11,7 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.bedmanagement.entity.Bed;
 import org.openmrs.module.bedmanagement.service.BedManagementService;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +138,37 @@ public class BedManagementServiceIntegrationTest extends BaseModuleWebContextSen
 		assertNull(bedDetails);
 	}
 	
+	@Test
+	public void unAssignPatientFromBed_shouldKeepBedUuidTypeAndCreator() {
+		int bedId = 12;
+		Bed before = bedManagementService.getBedById(bedId);
+		String uuid = before.getUuid();
+		Integer bedTypeId = before.getBedType().getId();
+		Context.flushSession();
+		Context.clearSession();
+
+		bedManagementService.unAssignPatientFromBed(Context.getPatientService().getPatient(4));
+		Context.flushSession();
+		Context.clearSession();
+
+		Bed after = bedManagementService.getBedById(bedId);
+		assertEquals(uuid, after.getUuid());
+		assertNotNull(after.getBedType());
+		assertEquals(bedTypeId, after.getBedType().getId());
+	}
+
+	@Test
+	public void unAssignPatientFromBed_shouldWorkWhenTheBedIsAlreadyInTheSession() {
+		Bed loaded = bedManagementService.getBedById(12);
+		assertNotNull(loaded);
+
+		BedDetails unassigned = bedManagementService.unAssignPatientFromBed(Context.getPatientService().getPatient(4));
+		Context.flushSession();
+
+		assertEquals(Integer.valueOf(12), unassigned.getBed().getId());
+		assertNull(bedManagementService.getBedAssignmentDetailsByPatient(Context.getPatientService().getPatient(4)));
+	}
+
 	@Test
 	public void shouldAssignPatientToBed() throws Exception {
 		PatientService patientService = Context.getPatientService();
