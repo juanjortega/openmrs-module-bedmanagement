@@ -259,7 +259,7 @@
 								<artifactItem>
 									<groupId>${project.parent.groupId}</groupId>
 									<artifactId>${project.parent.artifactId}-owa</artifactId>
-									<version>${project.parent.version}</version>
+									<version>6.0.0</version><!-- OWA de la release 6.0.0: el arreglo no la cambia -->
 									<type>zip</type>
 									<destFileName>bedmanagement.owa</destFileName>
 								</artifactItem>
